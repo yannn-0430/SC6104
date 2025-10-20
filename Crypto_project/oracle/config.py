@@ -1,16 +1,32 @@
 # oracle/config.py
-# Configuration for oracle service
+# Configuration for the oracle (RNG service)
 
+# Network config
 HOST = '127.0.0.1'
 PORT = 5000
 
-# If seed is None, oracle will seed from os.urandom (random each run).
-# For reproducible demos set deterministic seed (hex int).
-SEED = 0x1234567890ABCDEF1234567890ABCDEF  # None or int
+OUTPUT_MODE = 'hmac' # 'raw' or 'hmac'
+# Seed configuration:
+# - SEED_MODE:
+#     'fixed'  : use the integer in SEED (if SEED is None, falls back to deterministic constant)
+#     'random' : use os.urandom(16) at startup (non-deterministic each run)
+#     'time'   : use current unix time (int(time.time())) as seed - low entropy (for demo)
+SEED_MODE = 'fixed'   # 'fixed' | 'random' | 'time'
 
-# How many bits does oracle reveal per /get_output call?
-# Set to 128 to reveal full state; set to <128 to simulate truncation.
-OUTPUT_BITS = 128  # e.g., 128 or 64
+# If SEED_MODE == 'fixed', use this SEED (128-bit integer).
+# If None, a default deterministic 128-bit constant will be used.
+SEED = 0x1234567890ABCDEF1234567890ABCDEF  # or None
 
-# If OUTPUT_BITS < 128, which bits to reveal? Options: 'high' or 'low'
-OUTPUT_SELECT = 'high'
+# If SEED_MODE == 'time', this controls whether we use seconds or milliseconds.
+# 's' -> int(time.time()), 'ms' -> int(time.time() * 1000)
+TIME_GRANULARITY = 's'  # 's' or 'ms'
+
+# How many bits the oracle reveals on each /get_output call (1..128)
+OUTPUT_BITS = 128
+OUTPUT_SELECT = 'high'   # 'high' or 'low'
+
+# Optional rate limit (requests per second). None or 0 means no limit.
+RATE_LIMIT_RPS = None
+
+# Logging level
+LOG_LEVEL = 'INFO'
